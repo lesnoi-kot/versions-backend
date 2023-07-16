@@ -1,0 +1,74 @@
+services:
+  dataloader:
+    image: cosmtrek/air:v1.44.0
+    command:
+      - "--build.cmd"
+      - "go build -o /tmp/dataloader ./cmd/dataloader/main.go"
+      - "--build.bin"
+      - "/tmp/dataloader"
+    environment:
+      DEBUG: true
+      MONGO_URI: "mongodb://mongo:mongopassword@mongo:27017"
+      RABBIT_URI: "amqp://rabbit:rabbitpassword@rabbit:5672"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - air-go-cache:/root/.cache
+    working_dir: /app
+    depends_on:
+      - mongo
+      - rabbit
+
+  api:
+    image: cosmtrek/air:v1.44.0
+    command:
+      - "--build.cmd"
+      - "go build -o /tmp/api ./cmd/api/main.go"
+      - "--build.bin"
+      - "/tmp/api"
+    environment:
+      DEBUG: true
+      MONGO_URI: "mongodb://mongo:mongopassword@mongo:27017"
+      RABBIT_URI: "amqp://rabbit:rabbitpassword@rabbit:5672"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - air-go-cache:/root/.cache
+    working_dir: /app
+    ports:
+      - 4000:4000
+    depends_on:
+      - mongo
+      - rabbit
+
+  mongo:
+    image: mongo:6.0
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=mongopassword
+      - MONGO_INITDB_DATABASE=versions
+    ports:
+      - 27017:27017
+    command: --replSet rs0 --keyFile /tmp/mongoKeyFile
+    volumes:
+      - mongo-data:/data/db
+      - ./mongoKeyFile:/tmp/mongoKeyFile
+
+  rabbit:
+    image: rabbitmq:3.12-management
+    hostname: rabbit
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbit
+      - RABBITMQ_DEFAULT_PASS=rabbitpassword
+    ports:
+      - 15672:15672
+      - 15671:15671
+    volumes:
+      - rabbit-data:/var/lib/rabbitmq
+
+volumes:
+  mongo-data:
+  rabbit-data:
+  air-go-cache:
