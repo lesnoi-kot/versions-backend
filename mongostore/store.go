@@ -10,11 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-const (
-	DatabaseName          = "versions"
-	SourcesCollectionName = "sources"
-)
-
 type Store struct {
 	*mongo.Client
 }

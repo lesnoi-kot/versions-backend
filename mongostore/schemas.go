@@ -7,6 +7,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const (
+	DatabaseName          = "versions"
+	SourcesCollectionName = "sources"
+)
+
 type Source struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	CreatedAt   time.Time          `bson:"created_at" json:"createdAt,omitempty"`

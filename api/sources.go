@@ -20,8 +20,9 @@ import (
 type BriefSourceDTO struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	Name        string             `bson:"name" json:"name"`
-	Description string             `bson:"description" json:"description,omitempty"`
-	URL         string             `bson:"url" json:"url,omitempty"`
+	Description string             `bson:"description" json:"description"`
+	URL         string             `bson:"url" json:"url"`
+	IsFetching  bool               `bson:"is_fetching" json:"isFetching"`
 }
 
 func (api *APIService) getSources(c echo.Context) error {
@@ -143,7 +144,7 @@ func (api *APIService) addSource(c echo.Context) error {
 				bson.D{
 					{"$set", bson.D{
 						{"external_id", externalID},
-						{"url", repoInfo.GetURL()},
+						{"url", repoInfo.GetHTMLURL()},
 						{"name", repoInfo.GetName()},
 						{"owner", repoInfo.GetOwner().GetLogin()},
 						{"description", repoInfo.GetDescription()},
@@ -163,11 +164,8 @@ func (api *APIService) addSource(c echo.Context) error {
 						{"releases", false},
 					}),
 			)
-		if err = mongoResult.Err(); err != nil {
-			return nil, err
-		}
 
-		source := &mongostore.Source{}
+		source := new(mongostore.Source)
 		if err = mongoResult.Decode(source); err != nil {
 			return nil, err
 		}
