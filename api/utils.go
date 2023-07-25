@@ -1,6 +1,10 @@
 package api
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+	"unicode"
+)
 
 func parseQueryParamInt(queryValue string, defaultValue int) int {
 	value, err := strconv.Atoi(queryValue)
@@ -9,4 +13,16 @@ func parseQueryParamInt(queryValue string, defaultValue int) int {
 	}
 
 	return value
+}
+
+func sanitizeNameFilter(input string) string {
+	var sb strings.Builder
+
+	for _, ch := range input {
+		if unicode.IsLetter(ch) || unicode.IsDigit(ch) || ch == '-' {
+			sb.WriteRune(ch)
+		}
+	}
+
+	return sb.String()
 }

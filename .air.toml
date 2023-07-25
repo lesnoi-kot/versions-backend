@@ -17,8 +17,8 @@ tmp_dir = "../tmp"
   include_file = []
   kill_delay = "0s"
   log = "build-errors.log"
-  rerun = false
-  rerun_delay = 500
+  rerun = true
+  rerun_delay = 5000
   send_interrupt = false
   stop_on_error = true
 

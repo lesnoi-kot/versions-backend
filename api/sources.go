@@ -33,7 +33,7 @@ func (api *APIService) getSources(c echo.Context) error {
 
 	filters := bson.D{}
 	if name != "" {
-		filters = append(filters, bson.E{"name", primitive.Regex{name, "i"}})
+		filters = append(filters, bson.E{"name", primitive.Regex{sanitizeNameFilter(name), "i"}})
 	}
 
 	sources, err := mongostore.GetDocuments(
@@ -46,20 +46,18 @@ func (api *APIService) getSources(c echo.Context) error {
 				Find().
 				SetSkip(int64(page * count)).
 				SetLimit(int64(count)).
-				SetProjection(bson.D{
-					{"_id", true},
-					{"name", true},
-					{"description", true},
-					{"url", true},
-					{"is_fetching", true},
-				}),
+				SetMaxTime(5 * time.Second),
 		},
 	)
 	if err != nil {
 		return err
 	}
 
-	totalCount, err := api.Store.GetDocumentsCount(c.Request().Context(), mongostore.SourcesCollectionName)
+	totalCount, err := api.Store.GetDocumentsCount(
+		c.Request().Context(),
+		mongostore.SourcesCollectionName,
+		filters,
+	)
 	if err != nil {
 		return err
 	}

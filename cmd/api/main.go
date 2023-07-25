@@ -4,19 +4,19 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
 
 	"github.com/caarlos0/env/v6"
 	"github.com/lesnoi-kot/versions-backend/api"
+	"github.com/lesnoi-kot/versions-backend/common"
 	"github.com/lesnoi-kot/versions-backend/mongostore"
 	"github.com/lesnoi-kot/versions-backend/mq"
 )
 
 type AppConfig struct {
-	Debug     bool   `env:"DEBUG"`
-	MongoURI  string `env:"MONGO_URI,notEmpty"`
-	RabbitURI string `env:"RABBIT_URI,notEmpty"`
+	Debug        bool     `env:"DEBUG" envDefault:"true"`
+	MongoURI     string   `env:"MONGO_URI,notEmpty"`
+	RabbitURI    string   `env:"RABBIT_URI,notEmpty"`
+	AllowOrigins []string `env:"ALLOW_ORIGINS" envDefault:"*"`
 }
 
 func main() {
@@ -26,7 +26,8 @@ func main() {
 	}
 
 	globalCtx, cancel := context.WithCancel(context.Background())
-	go handleSignals(cancel)
+	defer cancel()
+	go common.HandleInterruptSignal(cancel)
 
 	store, err := mongostore.ConnectStore(globalCtx, config.MongoURI)
 	if err != nil {
@@ -47,8 +48,7 @@ func main() {
 	apiService := api.NewAPI(api.APIConfig{
 		Store:        store,
 		MQ:           amqp,
-		FrontendURL:  "",
-		AllowOrigins: []string{"*"},
+		AllowOrigins: config.AllowOrigins,
 		Debug:        config.Debug,
 	})
 
@@ -59,12 +59,4 @@ func main() {
 			log.Printf("Server stopped with an error: %s", err)
 		}
 	}
-}
-
-func handleSignals(cancel context.CancelFunc) {
-	quit := make(chan os.Signal)
-	signal.Notify(quit, os.Interrupt)
-
-	<-quit
-	cancel()
 }

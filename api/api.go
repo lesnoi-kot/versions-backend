@@ -17,7 +17,6 @@ const (
 type APIConfig struct {
 	Store        *mongostore.Store
 	MQ           *mq.AMQPConnection
-	FrontendURL  string
 	AllowOrigins []string
 	Debug        bool
 }
@@ -43,7 +42,7 @@ func NewAPI(config APIConfig) *APIService {
 
 	corsConfig := middleware.CORSConfig{
 		AllowOrigins:     config.AllowOrigins,
-		AllowCredentials: true, // Allow cookies in cross origin requests.
+		AllowCredentials: false, // Allow cookies in cross origin requests.
 	}
 
 	api.handler.Pre(middleware.RemoveTrailingSlash())

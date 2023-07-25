@@ -27,6 +27,15 @@ func ConnectStore(ctx context.Context, mongoURI string) (*Store, error) {
 		return nil, err
 	}
 
+	_, err = client.
+		Database(DatabaseName).
+		Collection(SourcesCollectionName).
+		Indexes().
+		CreateOne(timeoutCtx, mongo.IndexModel{Keys: bson.D{{"name", "text"}}})
+	if err != nil {
+		return nil, err
+	}
+
 	return &Store{client}, nil
 }
 
@@ -63,11 +72,11 @@ func GetDocuments[T any](ctx context.Context, store *Store, opts GetDocumentsOpt
 	return documents, nil
 }
 
-func (store *Store) GetDocumentsCount(ctx context.Context, collection string) (int64, error) {
+func (store *Store) GetDocumentsCount(ctx context.Context, collection string, filter bson.D) (int64, error) {
 	count, err := store.
 		Database(DatabaseName).
 		Collection(collection).
-		CountDocuments(ctx, bson.D{})
+		CountDocuments(ctx, filter)
 	if err != nil {
 		return 0, err
 	}

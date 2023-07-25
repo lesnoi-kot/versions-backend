@@ -10,7 +10,7 @@ import (
 
 const (
 	retriesExchangeName = "dlx-source-requests"
-	retryDelay          = time.Minute
+	retryDelay          = 1 * time.Hour
 )
 
 type AMQPConnection struct {
