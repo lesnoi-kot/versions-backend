@@ -34,7 +34,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/versions-backend-api:master
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/versions-backend-api:main
           target: api
           platforms: "linux/amd64,linux/arm/v7"
 
@@ -44,6 +44,6 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/versions-backend-dataloader:master
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/versions-backend-dataloader:main
           target: dataloader
           platforms: "linux/amd64,linux/arm/v7"
